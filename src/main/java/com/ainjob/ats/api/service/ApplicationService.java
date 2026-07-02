@@ -1,6 +1,7 @@
 package com.ainjob.ats.api.service;
 
 import com.ainjob.ats.api.dto.ApplicantSearchDto;
+import com.ainjob.ats.api.dto.ApplicantSearchRequest;
 import com.ainjob.ats.api.dto.ApplicantSearchResponse;
 import com.ainjob.ats.api.dto.PassedApplicantDto;
 import com.ainjob.ats.api.dto.PassedApplicantsResponse;
@@ -102,20 +103,17 @@ public class ApplicationService {
         }
     }
 
-    public ApplicantSearchResponse searchApplicants(
-            Long companyId, Integer stageType, Integer degreeType,
-            Long majorId, Integer minExpYears, List<Long> skillIds) {
-
+    public ApplicantSearchResponse searchApplicants(Long companyId, ApplicantSearchRequest req) {
         if (!companyRepository.existsById(companyId)) {
             throw new NotFoundException("Company not found: " + companyId);
         }
 
-        int minExpMonths = (minExpYears != null) ? minExpYears * 12 : 0;
-        List<Long> effectiveSkillIds = (skillIds == null || skillIds.isEmpty()) ? List.of(-1L) : skillIds;
-        int skillCount = (skillIds == null || skillIds.isEmpty()) ? 0 : skillIds.size();
+        int minExpMonths = (req.getMinExpYears() != null) ? req.getMinExpYears() * 12 : 0;
+        List<Long> effectiveSkillIds = (req.getSkillIds() == null || req.getSkillIds().isEmpty()) ? List.of(-1L) : req.getSkillIds();
+        int skillCount = (req.getSkillIds() == null || req.getSkillIds().isEmpty()) ? 0 : req.getSkillIds().size();
 
         List<ApplicantSearchDto> results = applicationRepository.searchApplicants(
-                companyId, stageType, degreeType, majorId, minExpMonths,
+                companyId, req.getStageType(), req.getDegreeType(), req.getMajorId(), minExpMonths,
                 effectiveSkillIds, skillCount);
 
         return ApplicantSearchResponse.builder()
