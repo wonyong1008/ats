@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AINJOB ATS — 합격자 조회</title>
+<title>AINJOB ATS — 관리 시스템</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -37,8 +37,33 @@
   .logo { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
   .logo span { opacity: .65; font-weight: 400; font-size: 13px; margin-left: 8px; }
 
+  /* 탭 */
+  .tab-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 0;
+  }
+  .tab-btn {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+  }
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
   /* 메인 */
-  main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+  main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 
   /* 카드 */
   .card {
@@ -66,13 +91,16 @@
   }
   .card-body { padding: 20px 24px; }
 
-  /* 필터 폼 */
-  .filter-grid {
+  /* 필터 그리드 */
+  .filter-row {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
     gap: 12px;
-    align-items: end;
+    margin-bottom: 12px;
   }
+  .filter-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .filter-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .filter-row.cols-2-btn { grid-template-columns: 1fr 1fr auto; align-items: end; }
+
   .field label {
     display: block;
     font-size: 11px;
@@ -84,7 +112,7 @@
   }
   select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 9px 12px;
     border: 1.5px solid var(--border);
     border-radius: 8px;
     font-size: 13px;
@@ -99,8 +127,53 @@
   }
   select:focus { outline: none; border-color: var(--primary); }
 
+  /* 체크박스 그룹 */
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    min-height: 42px;
+    align-items: flex-start;
+  }
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: #fff;
+    transition: border-color .12s, background .12s;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .checkbox-group label:hover { border-color: var(--primary); background: #f0f4ff; }
+  .checkbox-group input[type=checkbox] { accent-color: var(--primary); }
+  .checkbox-group input[type=checkbox]:checked + span { color: var(--primary); font-weight: 700; }
+  .checkbox-group label:has(input:checked) {
+    border-color: var(--primary);
+    background: #eef2ff;
+  }
+  .ui-only-tag {
+    font-size: 10px;
+    background: #fef9c3;
+    color: #854d0e;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 2px;
+  }
+
+  /* 버튼 */
   .btn-search {
-    padding: 10px 24px;
+    padding: 9px 24px;
     background: var(--primary);
     color: #fff;
     border: none;
@@ -110,10 +183,24 @@
     cursor: pointer;
     transition: background .15s, transform .1s;
     white-space: nowrap;
+    height: 38px;
   }
   .btn-search:hover { background: var(--primary-dark); }
   .btn-search:active { transform: scale(.97); }
   .btn-search:disabled { background: #a0aec0; cursor: not-allowed; }
+  .btn-reset {
+    padding: 9px 16px;
+    background: #fff;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .15s;
+    height: 38px;
+  }
+  .btn-reset:hover { border-color: var(--primary); color: var(--primary); }
 
   /* 결과 헤더 */
   .result-header {
@@ -146,7 +233,7 @@
     border-bottom: 1px solid var(--border);
   }
   td {
-    padding: 12px 14px;
+    padding: 11px 14px;
     border-bottom: 1px solid #f0f2f8;
     vertical-align: middle;
   }
@@ -161,6 +248,7 @@
     font-size: 12px;
     font-weight: 700;
     display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
   }
   .name-cell { display: flex; align-items: center; gap: 10px; }
   .id-badge {
@@ -173,6 +261,23 @@
     border-radius: 4px;
     font-family: monospace;
   }
+
+  /* 진행상태 뱃지 */
+  .stage-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .stage-1 { background: #e0e7ff; color: #3730a3; }
+  .stage-2 { background: #d1fae5; color: #065f46; }
+  .stage-3 { background: #fee2e2; color: #991b1b; }
+  .stage-4 { background: #fef3c7; color: #92400e; }
+  .stage-5 { background: #ede9fe; color: #5b21b6; }
+  .stage-6 { background: #bbf7d0; color: #14532d; font-weight: 900; }
+  .stage-7 { background: #fecaca; color: #7f1d1d; }
+  .stage-8 { background: #f3f4f6; color: #4b5563; }
   .pass-badge {
     display: inline-flex;
     align-items: center;
@@ -185,7 +290,7 @@
     border-radius: 20px;
   }
 
-  /* 상태 메시지 */
+  /* 상태/로딩/에러 */
   .state-box {
     text-align: center;
     padding: 40px 20px;
@@ -193,8 +298,6 @@
   }
   .state-box .emoji { font-size: 32px; margin-bottom: 10px; }
   .state-box p { font-size: 13px; }
-
-  /* 로딩 스피너 */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner {
     width: 24px; height: 24px;
@@ -204,8 +307,6 @@
     animation: spin .7s linear infinite;
     margin: 0 auto 12px;
   }
-
-  /* 에러 */
   .error-box {
     background: #fef2f2;
     border: 1px solid #fecaca;
@@ -217,8 +318,6 @@
     align-items: center;
     gap: 8px;
   }
-
-  /* 정보 바 */
   .info-bar {
     background: #eef1fb;
     border-radius: 8px;
@@ -228,8 +327,25 @@
     margin-bottom: 16px;
     display: flex;
     gap: 20px;
+    flex-wrap: wrap;
   }
   .info-bar span strong { color: var(--text); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
+  /* 탭 패널 */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 </style>
 </head>
 <body>
@@ -238,122 +354,245 @@
   <div class="logo">AINJOB <span>ATS 관리 시스템</span></div>
 </header>
 
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('passed')">합격자 필터 조회</button>
+  <button class="tab-btn" onclick="switchTab('search')">지원자 통합 검색</button>
+</div>
+
 <main>
-  <!-- 필터 카드 -->
-  <div class="card">
-    <div class="card-head">
-      <div class="icon">🔍</div>
-      <h2>합격자 필터 조회</h2>
+
+  <!-- ===== TAB 1: 합격자 필터 조회 ===== -->
+  <div id="tab-passed" class="tab-panel active">
+    <div class="card">
+      <div class="card-head">
+        <div class="icon">🏆</div>
+        <h2>합격자 필터 조회</h2>
+      </div>
+      <div class="card-body">
+        <div class="filter-row cols-2-btn">
+          <div class="field">
+            <label>기업</label>
+            <select id="passedCompanySelect" onchange="updatePassedJobs()">
+              <option value="1">테크스타트 (기업 1)</option>
+              <option value="2">이노베이션 (기업 2)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>채용 포지션</label>
+            <select id="passedJobSelect"></select>
+          </div>
+          <button class="btn-search" id="passedSearchBtn" onclick="searchPassed()">조회</button>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-      <div class="filter-grid">
-        <div class="field">
-          <label>기업</label>
-          <select id="companySelect">
-            <option value="1">테크스타트 (기업 1)</option>
-            <option value="2">이노베이션 (기업 2)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>채용 포지션</label>
-          <select id="jobSelect">
-            <option value="1">백엔드 개발자 (시니어) — Java / Spring Boot / AWS</option>
-            <option value="2">프런트엔드 개발자 — React / Next.js / TypeScript</option>
-          </select>
-        </div>
-        <button class="btn-search" id="searchBtn" onclick="search()">조회</button>
+
+    <div class="card" id="passedResultCard" style="display:none;">
+      <div class="card-head">
+        <div class="icon">✅</div>
+        <h2>합격자 목록</h2>
+      </div>
+      <div class="card-body">
+        <div id="passedResultContent"></div>
       </div>
     </div>
   </div>
 
-  <!-- 결과 카드 -->
-  <div class="card" id="resultCard" style="display:none;">
-    <div class="card-head">
-      <div class="icon">✅</div>
-      <h2>조회 결과</h2>
+  <!-- ===== TAB 2: 지원자 통합 검색 ===== -->
+  <div id="tab-search" class="tab-panel">
+    <div class="card">
+      <div class="card-head">
+        <div class="icon">🔍</div>
+        <h2>지원자 통합 검색</h2>
+      </div>
+      <div class="card-body">
+
+        <!-- Row 1: 기업 + 진행상태 -->
+        <div class="filter-row cols-2">
+          <div class="field">
+            <label>기업</label>
+            <select id="searchCompanySelect">
+              <option value="1">테크스타트 (기업 1)</option>
+              <option value="2">이노베이션 (기업 2)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>진행상태</label>
+            <select id="searchStageType">
+              <option value="">전체</option>
+              <option value="1">서류접수</option>
+              <option value="2">서류합격</option>
+              <option value="3">서류불합격</option>
+              <option value="4">면접예정</option>
+              <option value="5">면접완료</option>
+              <option value="6">최종합격</option>
+              <option value="7">최종불합격</option>
+              <option value="8">취소</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 2: 학력 + 전공 + 경력연차 -->
+        <div class="filter-row cols-3">
+          <div class="field">
+            <label>최소 학력</label>
+            <select id="searchDegreeType">
+              <option value="">전체</option>
+              <option value="1">고졸 이상</option>
+              <option value="2">전문학사 이상</option>
+              <option value="3">학사 이상</option>
+              <option value="4">석사 이상</option>
+              <option value="5">박사</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>전공</label>
+            <select id="searchMajorId">
+              <option value="">전체</option>
+              <option value="1">컴퓨터공학</option>
+              <option value="2">소프트웨어공학</option>
+              <option value="3">인공지능</option>
+              <option value="4">토목공학</option>
+              <option value="5">의상디자인</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>경력연차</label>
+            <select id="searchMinExpYears">
+              <option value="">전체</option>
+              <option value="1">1년 이상</option>
+              <option value="3">3년 이상</option>
+              <option value="5">5년 이상</option>
+              <option value="7">7년 이상</option>
+              <option value="10">10년 이상</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: 기술스택 (복수선택) -->
+        <div class="field" style="margin-bottom:12px;">
+          <label>기술스택 <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0;">(AND 조건 — 선택 스킬 모두 보유한 지원자)</span></label>
+          <div class="checkbox-group" id="skillCheckboxes">
+            <!-- 백엔드 -->
+            <label><input type="checkbox" value="7"><span>Java</span></label>
+            <label><input type="checkbox" value="16"><span>Spring Boot</span></label>
+            <label><input type="checkbox" value="9"><span>JPA</span></label>
+            <label><input type="checkbox" value="10"><span>Kotlin</span></label>
+            <label><input type="checkbox" value="13"><span>Python</span></label>
+            <label><input type="checkbox" value="1"><span>ASP</span></label>
+            <label><input type="checkbox" value="12"><span>PHP</span></label>
+            <label><input type="checkbox" value="17"><span>Struts</span></label>
+            <!-- 구분선 역할: 프런트 -->
+            <label><input type="checkbox" value="15"><span>React</span></label>
+            <label><input type="checkbox" value="11"><span>Next.js</span></label>
+            <label><input type="checkbox" value="20"><span>TypeScript</span></label>
+            <label><input type="checkbox" value="8"><span>JavaScript</span></label>
+            <label><input type="checkbox" value="3"><span>CSS</span></label>
+            <label><input type="checkbox" value="6"><span>HTML</span></label>
+            <label><input type="checkbox" value="21"><span>Webpack</span></label>
+            <!-- 클라우드/DB/AI -->
+            <label><input type="checkbox" value="2"><span>AWS</span></label>
+            <label><input type="checkbox" value="18"><span>System Architect</span></label>
+            <label><input type="checkbox" value="4"><span>DBA</span></label>
+            <label><input type="checkbox" value="5"><span>Deep Learning</span></label>
+            <label><input type="checkbox" value="14"><span>PyTorch</span></label>
+            <label><input type="checkbox" value="19"><span>TensorFlow</span></label>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="btn-row">
+          <button class="btn-reset" onclick="resetSearch()">초기화</button>
+          <button class="btn-search" id="searchBtn" onclick="searchApplicants()">검색</button>
+        </div>
+
+      </div>
     </div>
-    <div class="card-body">
-      <div id="resultContent"></div>
+
+    <div class="card" id="searchResultCard" style="display:none;">
+      <div class="card-head">
+        <div class="icon">👥</div>
+        <h2>검색 결과</h2>
+      </div>
+      <div class="card-body">
+        <div id="searchResultContent"></div>
+      </div>
     </div>
   </div>
+
 </main>
 
 <script>
-  // company가 바뀌면 job posting 목록도 업데이트
-  document.getElementById('companySelect').addEventListener('change', function() {
-    const c = this.value;
-    const jsel = document.getElementById('jobSelect');
-    jsel.innerHTML = '';
-    if (c === '1') {
-      jsel.innerHTML = `
-        <option value="1">백엔드 개발자 (시니어) — Java / Spring Boot / AWS</option>
-        <option value="2">프런트엔드 개발자 — React / Next.js / TypeScript</option>`;
-    } else {
-      jsel.innerHTML = `
-        <option value="3">백엔드 개발자 (시니어) — Java / Spring Boot / AWS</option>
-        <option value="4">프런트엔드 개발자 — React / Next.js / TypeScript</option>`;
-    }
-  });
+  /* ── 탭 전환 ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
 
-  async function search() {
-    const companyId = document.getElementById('companySelect').value;
-    const jobId = document.getElementById('jobSelect').value;
-    const companyName = document.getElementById('companySelect').options[document.getElementById('companySelect').selectedIndex].text.split(' ')[0];
-    const jobName = document.getElementById('jobSelect').options[document.getElementById('jobSelect').selectedIndex].text.split(' — ')[0];
-    const btn = document.getElementById('searchBtn');
+  /* ── 합격자 탭: 회사 변경 시 포지션 갱신 ── */
+  const JOB_OPTIONS = {
+    '1': [
+      { value: '1', label: '백엔드 개발자 (시니어) — Java / Spring Boot / AWS' },
+      { value: '2', label: '프런트엔드 개발자 — React / Next.js / TypeScript' }
+    ],
+    '2': [
+      { value: '3', label: '백엔드 개발자 (시니어) — Java / Spring Boot / AWS' },
+      { value: '4', label: '프런트엔드 개발자 — React / Next.js / TypeScript' }
+    ]
+  };
+  function updatePassedJobs() {
+    const c = document.getElementById('passedCompanySelect').value;
+    const sel = document.getElementById('passedJobSelect');
+    sel.innerHTML = JOB_OPTIONS[c].map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+  }
+  updatePassedJobs(); // 초기화
 
-    btn.disabled = true;
-    btn.textContent = '조회 중...';
+  /* ── 합격자 조회 ── */
+  async function searchPassed() {
+    const companyId = document.getElementById('passedCompanySelect').value;
+    const jobId = document.getElementById('passedJobSelect').value;
+    const companyName = document.getElementById('passedCompanySelect').selectedOptions[0].text.split(' ')[0];
+    const jobName = document.getElementById('passedJobSelect').selectedOptions[0].text.split(' — ')[0];
+    const btn = document.getElementById('passedSearchBtn');
+    btn.disabled = true; btn.textContent = '조회 중...';
 
-    const resultCard = document.getElementById('resultCard');
-    const content = document.getElementById('resultContent');
-
-    resultCard.style.display = 'block';
-    content.innerHTML = `<div class="state-box"><div class="spinner"></div><p>데이터를 불러오는 중...</p></div>`;
+    const card = document.getElementById('passedResultCard');
+    const content = document.getElementById('passedResultContent');
+    card.style.display = 'block';
+    content.innerHTML = `<div class="state-box"><div class="spinner"></div><p>불러오는 중...</p></div>`;
 
     try {
       const res = await fetch(`/api/v1/companies/${companyId}/job-postings/${jobId}/applicants/passed`);
       if (!res.ok) {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         content.innerHTML = `<div class="error-box">⚠️ ${err.error || '오류가 발생했습니다.'}</div>`;
         return;
       }
-
       const data = await res.json();
-      renderResult(data, companyName, jobName);
+      renderPassedResult(data, companyName, jobName);
     } catch (e) {
-      content.innerHTML = `<div class="error-box">⚠️ 서버에 연결할 수 없습니다. Spring Boot가 실행 중인지 확인하세요.</div>`;
+      content.innerHTML = `<div class="error-box">⚠️ 서버에 연결할 수 없습니다.</div>`;
     } finally {
-      btn.disabled = false;
-      btn.textContent = '조회';
+      btn.disabled = false; btn.textContent = '조회';
     }
   }
 
-  function renderResult(data, companyName, jobName) {
-    const content = document.getElementById('resultContent');
-
+  function renderPassedResult(data, companyName, jobName) {
+    const content = document.getElementById('passedResultContent');
     const filterDesc = jobName.includes('백엔드')
-      ? '학사 CS관련, 백엔드 ≥ 5년, Java + Spring Boot + AWS 보유'
-      : '학사 CS관련, 프런트엔드 ≥ 3년, React + Next.js + TypeScript 보유';
+      ? '학사 CS관련, 백엔드 ≥ 5년, Java + Spring Boot + AWS'
+      : '학사 CS관련, 프런트엔드 ≥ 3년, React + Next.js + TypeScript';
 
-    if (data.passedApplicants.length === 0) {
-      content.innerHTML = `
-        <div class="state-box">
-          <div class="emoji">📭</div>
-          <p>조건에 맞는 합격자가 없습니다.</p>
-        </div>`;
+    if (!data.passedApplicants || data.passedApplicants.length === 0) {
+      content.innerHTML = `<div class="state-box"><div class="emoji">📭</div><p>조건에 맞는 합격자가 없습니다.</p></div>`;
       return;
     }
 
     const rows = data.passedApplicants.map((a, i) => `
       <tr>
         <td>${i + 1}</td>
-        <td>
-          <div class="name-cell">
-            <div class="avatar">${a.name[0]}</div>
-            ${a.name}
-          </div>
-        </td>
+        <td><div class="name-cell"><div class="avatar">${a.name[0]}</div>${a.name}</div></td>
         <td>${a.email}</td>
         <td><span class="id-badge">#${a.applicantId}</span></td>
         <td><span class="pass-badge">✓ 최종합격</span></td>
@@ -370,15 +609,114 @@
         <span class="count-badge">총 ${data.totalCount}명</span>
       </div>
       <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>이름</th>
-            <th>이메일</th>
-            <th>지원자 ID</th>
-            <th>상태</th>
-          </tr>
-        </thead>
+        <thead><tr><th>#</th><th>이름</th><th>이메일</th><th>지원자 ID</th><th>상태</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  /* ── 지원자 검색 ── */
+  const STAGE_LABELS = {
+    1: '서류접수', 2: '서류합격', 3: '서류불합격',
+    4: '면접예정', 5: '면접완료',
+    6: '최종합격', 7: '최종불합격', 8: '취소'
+  };
+
+  function resetSearch() {
+    document.getElementById('searchStageType').value = '';
+    document.getElementById('searchDegreeType').value = '';
+    document.getElementById('searchMajorId').value = '';
+    document.getElementById('searchMinExpYears').value = '';
+    document.querySelectorAll('#skillCheckboxes input[type=checkbox]').forEach(cb => cb.checked = false);
+    document.getElementById('searchResultCard').style.display = 'none';
+  }
+
+  async function searchApplicants() {
+    const companyId = document.getElementById('searchCompanySelect').value;
+    const stageType = document.getElementById('searchStageType').value;
+    const degreeType = document.getElementById('searchDegreeType').value;
+    const majorId = document.getElementById('searchMajorId').value;
+    const minExpYears = document.getElementById('searchMinExpYears').value;
+    const checkedSkills = [...document.querySelectorAll('#skillCheckboxes input:checked')].map(cb => cb.value);
+
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true; btn.textContent = '검색 중...';
+
+    const card = document.getElementById('searchResultCard');
+    const content = document.getElementById('searchResultContent');
+    card.style.display = 'block';
+    content.innerHTML = `<div class="state-box"><div class="spinner"></div><p>불러오는 중...</p></div>`;
+
+    // 쿼리 파라미터 조립
+    const params = new URLSearchParams();
+    if (stageType) params.append('stageType', stageType);
+    if (degreeType) params.append('degreeType', degreeType);
+    if (majorId) params.append('majorId', majorId);
+    if (minExpYears) params.append('minExpYears', minExpYears);
+    checkedSkills.forEach(id => params.append('skillIds', id));
+
+    try {
+      const res = await fetch(`/api/v1/companies/${companyId}/applicants?${params}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        content.innerHTML = `<div class="error-box">⚠️ ${err.error || '오류가 발생했습니다.'}</div>`;
+        return;
+      }
+      const data = await res.json();
+      renderSearchResult(data, companyId, stageType, degreeType, majorId, minExpYears, checkedSkills);
+    } catch (e) {
+      content.innerHTML = `<div class="error-box">⚠️ 서버에 연결할 수 없습니다.</div>`;
+    } finally {
+      btn.disabled = false; btn.textContent = '검색';
+    }
+  }
+
+  const SKILL_NAMES = {
+    1:'ASP',2:'AWS',3:'CSS',4:'DBA',5:'Deep Learning',6:'HTML',7:'Java',8:'JavaScript',
+    9:'JPA',10:'Kotlin',11:'Next.js',12:'PHP',13:'Python',14:'PyTorch',15:'React',
+    16:'Spring Boot',17:'Struts',18:'System Architect',19:'TensorFlow',20:'TypeScript',21:'Webpack'
+  };
+  const DEGREE_LABELS = { 1:'고졸 이상', 2:'전문학사 이상', 3:'학사 이상', 4:'석사 이상', 5:'박사' };
+  const MAJOR_LABELS = { 1:'컴퓨터공학', 2:'소프트웨어공학', 3:'인공지능', 4:'토목공학', 5:'의상디자인' };
+  const COMPANY_NAMES = { 1:'테크스타트', 2:'이노베이션' };
+
+  function renderSearchResult(data, companyId, stageType, degreeType, majorId, minExpYears, checkedSkills) {
+    const content = document.getElementById('searchResultContent');
+
+    const filterTags = [];
+    if (stageType) filterTags.push(`진행상태: ${STAGE_LABELS[stageType]}`);
+    if (degreeType) filterTags.push(`학력: ${DEGREE_LABELS[degreeType]}`);
+    if (majorId) filterTags.push(`전공: ${MAJOR_LABELS[majorId]}`);
+    if (minExpYears) filterTags.push(`경력: ${minExpYears}년 이상`);
+    if (checkedSkills.length > 0) filterTags.push(`스킬: ${checkedSkills.map(id => SKILL_NAMES[id]).join(' + ')}`);
+    if (filterTags.length === 0) filterTags.push('전체 조회');
+
+    if (!data.applicants || data.applicants.length === 0) {
+      content.innerHTML = `
+        <div class="info-bar"><span>🏢 기업: <strong>${COMPANY_NAMES[companyId]}</strong></span><span>🔎 필터: ${filterTags.join(' / ')}</span></div>
+        <div class="state-box"><div class="emoji">📭</div><p>조건에 맞는 지원자가 없습니다.</p></div>`;
+      return;
+    }
+
+    const rows = data.applicants.map((a, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><div class="name-cell"><div class="avatar">${a.name[0]}</div>${a.name}</div></td>
+        <td>${a.email}</td>
+        <td><span class="id-badge">#${a.applicantId}</span></td>
+        <td><span class="stage-badge stage-${a.stageType}">${a.stageName}</span></td>
+      </tr>`).join('');
+
+    content.innerHTML = `
+      <div class="info-bar">
+        <span>🏢 기업: <strong>${COMPANY_NAMES[companyId]}</strong></span>
+        <span>🔎 필터: ${filterTags.join(' / ')}</span>
+      </div>
+      <div class="result-header">
+        <span class="result-title">검색 결과</span>
+        <span class="count-badge">총 ${data.totalCount}명</span>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>이름</th><th>이메일</th><th>지원자 ID</th><th>진행상태</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   }
