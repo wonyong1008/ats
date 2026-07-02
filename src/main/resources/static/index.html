@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AINJOB ATS — 합격자 조회</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #3b6ef8;
+    --primary-dark: #2a56e0;
+    --surface: #f8f9ff;
+    --border: #dde3f0;
+    --text: #1a1a2e;
+    --muted: #7b8ab8;
+    --success: #22c55e;
+    --danger: #ef4444;
+  }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+    background: #eef1fb;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* 헤더 */
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 0 32px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(59,110,248,.3);
+  }
+  .logo { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { opacity: .65; font-weight: 400; font-size: 13px; margin-left: 8px; }
+
+  /* 메인 */
+  main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+
+  /* 카드 */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(59,110,248,.06);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .card-head {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-head h2 { font-size: 14px; font-weight: 700; }
+  .card-head .icon {
+    width: 28px; height: 28px;
+    background: #eef1fb;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .card-body { padding: 20px 24px; }
+
+  /* 필터 폼 */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237b8ab8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  select:focus { outline: none; border-color: var(--primary); }
+
+  .btn-search {
+    padding: 10px 24px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    white-space: nowrap;
+  }
+  .btn-search:hover { background: var(--primary-dark); }
+  .btn-search:active { transform: scale(.97); }
+  .btn-search:disabled { background: #a0aec0; cursor: not-allowed; }
+
+  /* 결과 헤더 */
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .result-title { font-size: 13px; font-weight: 700; }
+  .count-badge {
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+
+  /* 테이블 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--surface); }
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f2f8;
+    vertical-align: middle;
+  }
+  tbody tr:hover { background: #fafbff; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #6c8fff);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .name-cell { display: flex; align-items: center; gap: 10px; }
+  .id-badge {
+    display: inline-block;
+    background: #eef1fb;
+    color: var(--primary);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  .pass-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* 상태 메시지 */
+  .state-box {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .state-box .emoji { font-size: 32px; margin-bottom: 10px; }
+  .state-box p { font-size: 13px; }
+
+  /* 로딩 스피너 */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 3px solid #dde3f0;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto 12px;
+  }
+
+  /* 에러 */
+  .error-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #dc2626;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 정보 바 */
+  .info-bar {
+    background: #eef1fb;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    gap: 20px;
+  }
+  .info-bar span strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AINJOB <span>ATS 관리 시스템</span></div>
+</header>
+
+<main>
+  <!-- 필터 카드 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="icon">🔍</div>
+      <h2>합격자 필터 조회</h2>
+    </div>
+    <div class="card-body">
+      <div class="filter-grid">
+        <div class="field">
+          <label>기업</label>
+          <select id="companySelect">
+            <option value="1">테크스타트 (기업 1)</option>
+            <option value="2">이노베이션 (기업 2)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>채용 포지션</label>
+          <select id="jobSelect">
+            <option value="1">백엔드 개발자 (시니어) — Java / Spring Boot / AWS</option>
+            <option value="2">프런트엔드 개발자 — React / Next.js / TypeScript</option>
+          </select>
+        </div>
+        <button class="btn-search" id="searchBtn" onclick="search()">조회</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 결과 카드 -->
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="card-head">
+      <div class="icon">✅</div>
+      <h2>조회 결과</h2>
+    </div>
+    <div class="card-body">
+      <div id="resultContent"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // company가 바뀌면 job posting 목록도 업데이트
+  document.getElementById('companySelect').addEventListener('change', function() {
+    const c = this.value;
+    const jsel = document.getElementById('jobSelect');
+    jsel.innerHTML = '';
+    if (c === '1') {
+      jsel.innerHTML = `
+        <option value="1">백엔드 개발자 (시니어) — Java / Spring Boot / AWS</option>
+        <option value="2">프런트엔드 개발자 — React / Next.js / TypeScript</option>`;
+    } else {
+      jsel.innerHTML = `
+        <option value="3">백엔드 개발자 (시니어) — Java / Spring Boot / AWS</option>
+        <option value="4">프런트엔드 개발자 — React / Next.js / TypeScript</option>`;
+    }
+  });
+
+  async function search() {
+    const companyId = document.getElementById('companySelect').value;
+    const jobId = document.getElementById('jobSelect').value;
+    const companyName = document.getElementById('companySelect').options[document.getElementById('companySelect').selectedIndex].text.split(' ')[0];
+    const jobName = document.getElementById('jobSelect').options[document.getElementById('jobSelect').selectedIndex].text.split(' — ')[0];
+    const btn = document.getElementById('searchBtn');
+
+    btn.disabled = true;
+    btn.textContent = '조회 중...';
+
+    const resultCard = document.getElementById('resultCard');
+    const content = document.getElementById('resultContent');
+
+    resultCard.style.display = 'block';
+    content.innerHTML = `<div class="state-box"><div class="spinner"></div><p>데이터를 불러오는 중...</p></div>`;
+
+    try {
+      const res = await fetch(`/api/v1/companies/${companyId}/job-postings/${jobId}/applicants/passed`);
+      if (!res.ok) {
+        const err = await res.json();
+        content.innerHTML = `<div class="error-box">⚠️ ${err.error || '오류가 발생했습니다.'}</div>`;
+        return;
+      }
+
+      const data = await res.json();
+      renderResult(data, companyName, jobName);
+    } catch (e) {
+      content.innerHTML = `<div class="error-box">⚠️ 서버에 연결할 수 없습니다. Spring Boot가 실행 중인지 확인하세요.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '조회';
+    }
+  }
+
+  function renderResult(data, companyName, jobName) {
+    const content = document.getElementById('resultContent');
+
+    const filterDesc = jobName.includes('백엔드')
+      ? '학사 CS관련, 백엔드 ≥ 5년, Java + Spring Boot + AWS 보유'
+      : '학사 CS관련, 프런트엔드 ≥ 3년, React + Next.js + TypeScript 보유';
+
+    if (data.passedApplicants.length === 0) {
+      content.innerHTML = `
+        <div class="state-box">
+          <div class="emoji">📭</div>
+          <p>조건에 맞는 합격자가 없습니다.</p>
+        </div>`;
+      return;
+    }
+
+    const rows = data.passedApplicants.map((a, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>
+          <div class="name-cell">
+            <div class="avatar">${a.name[0]}</div>
+            ${a.name}
+          </div>
+        </td>
+        <td>${a.email}</td>
+        <td><span class="id-badge">#${a.applicantId}</span></td>
+        <td><span class="pass-badge">✓ 최종합격</span></td>
+      </tr>`).join('');
+
+    content.innerHTML = `
+      <div class="info-bar">
+        <span>🏢 기업: <strong>${companyName}</strong></span>
+        <span>💼 공고: <strong>${jobName}</strong></span>
+        <span>📋 필터: ${filterDesc}</span>
+      </div>
+      <div class="result-header">
+        <span class="result-title">합격자 목록</span>
+        <span class="count-badge">총 ${data.totalCount}명</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>지원자 ID</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+</script>
+</body>
+</html>
