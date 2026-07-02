@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
+    @Query("SELECT a FROM Application a JOIN FETCH a.applicant JOIN FETCH a.jobPosting WHERE a.id = :id AND a.company.id = :companyId")
+    java.util.Optional<Application> findByIdAndCompanyId(@Param("id") Long id, @Param("companyId") Long companyId);
+
     // 목적: company_id + job_posting_id 기준 최종합격자 필터
     // 전제: stage_type=6(최종합격), degree_type=3(학사) + is_cs_related=1, 직군 경력 합산 >= min_exp_years
     // 인덱스 전제: idx_app_company_stage (company_id, current_stage_id)
